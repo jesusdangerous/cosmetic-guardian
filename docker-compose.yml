@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+  backend:
     build:
       context: ./app/app
       dockerfile: Dockerfile
@@ -15,6 +15,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
     restart: unless-stopped
 
   db:
