@@ -26,7 +26,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"}, allowCredentials = "true")
 public class AuthController {
 
     private static final int CODE_VALIDITY_MINUTES = 15;
@@ -37,16 +37,12 @@ public class AuthController {
     private final EmailService emailService;
 
     @PostMapping("/start")
-    public ResponseEntity<String> start(@RequestBody @Valid RegisterRequest req) {
-        if (userRepo.findByTelegramId(req.getTelegramId()).isPresent()) {
-            return ResponseEntity.ok("Пользователь уже зарегистрирован");
-        }
-
+    public ResponseEntity<Map<String, String>> startRegistration(@RequestBody @Valid RegisterRequest req) {
         if (userRepo.findByEmail(req.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email уже используется");
         }
 
-        Optional<PendingRegistration> existingReg = pendingRepo.findById(req.getTelegramId());
+        Optional<PendingRegistration> existingReg = pendingRepo.findByEmail(req.getEmail());
         if (existingReg.isPresent()) {
             long minutesSinceLastRequest = ChronoUnit.MINUTES.between(
                     existingReg.get().getCreatedAt(),
@@ -60,31 +56,30 @@ public class AuthController {
                                 CODE_REQUEST_COOLDOWN_MINUTES - minutesSinceLastRequest)
                 );
             }
+            pendingRepo.delete(existingReg.get());
         }
 
-        String code = String.format("%04d", new SecureRandom().nextInt(1_000_000));
+        String code = String.format("%04d", new SecureRandom().nextInt(10_000));
 
-        PendingRegistration reg = new PendingRegistration(
-                req.getTelegramId(),
-                req.getEmail(),
-                code,
-                LocalDateTime.now()
-        );
+        PendingRegistration reg = new PendingRegistration();
+        reg.setEmail(req.getEmail());
+        reg.setCode(code);
+        reg.setCreatedAt(LocalDateTime.now());
         pendingRepo.save(reg);
 
         emailService.sendCode(req.getEmail(), code);
-        log.info("Код подтверждения отправлен для telegramId: {}", req.getTelegramId());
+        log.info("Код подтверждения отправлен на email: {}", req.getEmail());
 
-        return ResponseEntity.ok("Код отправлен на почту");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Код отправлен на почту"));
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verify(@RequestBody @Valid VerifyCodeRequest req) {
-        PendingRegistration reg = pendingRepo.findById(req.getTelegramId())
+    public ResponseEntity<Map<String, String>> verifyCode(@RequestBody @Valid VerifyCodeRequest req) {
+        PendingRegistration reg = pendingRepo.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Регистрация не найдена"));
 
         if (reg.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(CODE_VALIDITY_MINUTES))) {
-            pendingRepo.deleteById(req.getTelegramId());
+            pendingRepo.delete(reg);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Срок действия кода истек");
         }
 
@@ -93,29 +88,21 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setTelegramId(reg.getTelegramId());
         user.setEmail(reg.getEmail());
         user.setEmailConfirmed(true);
         userRepo.save(user);
 
-        pendingRepo.deleteById(req.getTelegramId());
+        pendingRepo.delete(reg);
 
         emailService.sendWelcomeEmail(reg.getEmail());
-        log.info("Пользователь успешно зарегистрирован: telegramId={}, email={}",
-                reg.getTelegramId(), reg.getEmail());
+        log.info("Пользователь успешно зарегистрирован: email={}", reg.getEmail());
 
-        return ResponseEntity.ok("Регистрация подтверждена");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Регистрация подтверждена"));
     }
 
-    @GetMapping("/profile")
-    public User getProfile(@RequestParam String telegramId) {
-        return userRepo.findByTelegramId(telegramId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<Map<String, Boolean>> checkRegistration(@RequestParam String telegramId) {
-        boolean isRegistered = userRepo.findByTelegramId(telegramId).isPresent();
-        return ResponseEntity.ok(Collections.singletonMap("registered", isRegistered));
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam String email) {
+        boolean isAvailable = !userRepo.findByEmail(email).isPresent();
+        return ResponseEntity.ok(Collections.singletonMap("available", isAvailable));
     }
 }

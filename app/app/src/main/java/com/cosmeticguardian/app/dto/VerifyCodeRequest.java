@@ -6,9 +6,10 @@ import lombok.Data;
 
 @Data
 public class VerifyCodeRequest {
-    @NotBlank
-    private String telegramId;
+    @NotBlank(message = "Email обязателен")
+    private String email;
 
-    @Pattern(regexp = "\\d{4}")
+    @NotBlank(message = "Код обязателен")
+    @Pattern(regexp = "\\d{4}", message = "Код должен состоять из 4 цифр")
     private String code;
 }
