@@ -14,19 +14,18 @@ import java.util.List;
 @Setter
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue
     private Long id;
-
+    private String telegramId;
     private String email;
-
     private LocalDate birthDate;
+    private boolean emailConfirmed;
 
     @ElementCollection
     private List<String> allergens;
 
     @ElementCollection
     private List<String> skinProblems;
-
-    private boolean emailConfirmed;
 }
