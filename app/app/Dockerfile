@@ -1,0 +1,13 @@
+FROM eclipse-temurin:21-jdk-jammy
+
+WORKDIR /app
+
+COPY target/app-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+ENV MAIL_NAME=${MAIL_NAME}
+ENV MAIL_PASSWORD=${MAIL_PASSWORD}
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
