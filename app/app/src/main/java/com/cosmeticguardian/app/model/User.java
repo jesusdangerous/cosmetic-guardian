@@ -19,7 +19,6 @@ public class User {
     private Long id;
 
     private String email;
-    private String telegramId;
 
     private LocalDate birthDate;
 
