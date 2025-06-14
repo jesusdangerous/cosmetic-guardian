@@ -1,16 +1,10 @@
 <template>
   <div class="page-wrapper">
-    <teleport to="body">
-        <div v-if="showSortModal" class="modal-overlay" @click.self="closeSortModal">
-          <SortReviews @sort-changed="handleSortChanged" />
-        </div>
-      </teleport>
     <header>
-      <IconButton href="/analysis-result"><img src="../assets/images/arrow-back.svg"></IconButton>
+      <IconButton><img src="../assets/images/arrow-back.svg"></IconButton>
       <h1>Отзывы</h1>
     </header>
     <main>
-
       <div class="reviews-info">
         <div>
           <img src="../assets/images/reviews-star.svg">
@@ -19,7 +13,7 @@
         <span>14 оценок</span>
       </div>
       <div class="reviews-parametrs">
-        <button @click="openSortModal">
+        <button>
           <img src="../assets/images/icon-arrow-up-down.svg">
           <p>Новые</p>
         </button>
@@ -35,8 +29,6 @@
           />
       </div>
     </main>
-
-
   </div>
 
 </template>
@@ -66,44 +58,9 @@ const reviews = [
     cons: 'Нет',
   },
 ]
-
-import { ref } from 'vue'
-
-// другие импорты...
-import sortReviews from './sort-reviews.vue' // импорт модалки
-import SortReviews from './sort-reviews.vue';
-
-const showSortModal = ref(false)
-
-const openSortModal = () => {
-  showSortModal.value = true
-}
-
-const closeSortModal = () => {
-  showSortModal.value = false
-}
-
-const handleSortChanged = (value) => {
-  // здесь можно применить сортировку
-  console.log('Сортировка:', value)
-  closeSortModal()
-}
-
 </script>
 
 <style scoped>
-:deep(.modal-overlay) {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .reviews {
   display: flex;
   flex-direction: column;

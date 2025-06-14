@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <header>
-      <IconButton href="experts"><img src="../assets/images/arrow-back.svg"></IconButton>
+      <IconButton><img src="../assets/images/arrow-back.svg"></IconButton>
       <h1>Чаты</h1>
     </header>
     <main>

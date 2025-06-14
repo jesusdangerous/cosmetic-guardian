@@ -2,7 +2,7 @@
   <body>
     <div class="page-wrapper">
     <header>
-      <IconButton href="/main-page"><img src="../assets/images/arrow-back.svg"></IconButton>
+      <IconButton><img src="../assets/images/arrow-back.svg"></IconButton>
       <h1>Личный кабинет</h1>
     </header>
       <main>
@@ -11,8 +11,8 @@
             <div>
               <img src="../assets/images/photo-user.svg">
               <div>
-                <h2>Арина</h2>
-                <p>+7 977 324 8982</p>
+                <h2>Дарья</h2>
+                <p>+7 982 912 87 35</p>
               </div>
             </div>
             <button>Изменить</button>
@@ -42,7 +42,7 @@
           </div>
           <div class="help">
             <p>Справка и поддержка</p>
-            <IconButton href="/support"><img class="arrow" src="../assets/images/arrow-back.svg"></IconButton>
+            <IconButton><img class="arrow" src="../assets/images/arrow-back.svg"></IconButton>
           </div>
           <div class="exit">
             <p>Выйти</p>

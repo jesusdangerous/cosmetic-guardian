@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <header>
-      <IconButton href="/main-page"><img src='../assets/images/arrow-back.svg'></IconButton>
+      <IconButton><img src='../assets/images/arrow-back.svg'></IconButton>
       <h1>Анализ состава</h1>
     </header>
     <main>

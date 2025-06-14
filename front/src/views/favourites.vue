@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <header>
-      <IconButton href="/main-page">
+      <IconButton>
         <img src="@/assets/images/arrow-back.svg" alt="Назад" />
       </IconButton>
       <h1>Избранное</h1>
