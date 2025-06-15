@@ -12,6 +12,7 @@ services:
       - MAIL_NAME=${MAIL_NAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/cosmeticguardian
+      - DEEPSEEK_KEY=${DEEPSEEK_KEY}
     depends_on:
       db:
         condition: service_healthy
@@ -24,7 +25,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8080  # Для разработки
+      - VITE_API_URL=http://localhost:8080
       - CHOKIDAR_USEPOLLING=true
       - NODE_ENV=development
     volumes:
