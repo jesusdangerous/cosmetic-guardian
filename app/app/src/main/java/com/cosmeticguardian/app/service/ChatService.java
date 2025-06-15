@@ -30,7 +30,6 @@ public class ChatService {
         Chat chat = new Chat();
         chat.setUser(user);
         chat.setTitle(title);
-        chat.setIsUnread(false);
 
         return chatRepository.save(chat);
     }
@@ -45,7 +44,6 @@ public class ChatService {
         message.setChat(chat);
         message.setSender(sender);
         message.setContent(content);
-        message.setIsRead(false);
 
         chat.setLastMessage(content);
         chatRepository.save(chat);
@@ -59,15 +57,6 @@ public class ChatService {
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
         User user = userService.getUserById(userId);
 
-        List<Message> unreadMessages = messageRepository.findUnreadMessages(chat, user);
-        unreadMessages.forEach(message -> message.setIsRead(true));
-        messageRepository.saveAll(unreadMessages);
-
-        chat.setIsUnread(false);
         chatRepository.save(chat);
-    }
-
-    public List<Message> getChatMessages(Long chatId) {
-
     }
 }
