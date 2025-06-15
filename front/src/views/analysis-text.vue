@@ -6,7 +6,7 @@
     </header>
     <main>
       <div>
-        <textarea placeholder="Состав косметического средства" name="" id=""></textarea>
+        <textarea v-model="ingredients" placeholder="Состав косметического средства"></textarea>
       </div>
       <div>
         <h2>
@@ -20,9 +20,9 @@
         </div>
       </div>
       <div>
-        <a href="/analysis-result">
+        <button @click="analyzeComposition">
           <p>Анализ состава</p>
-        </a>
+        </button>
       </div>
 
     </main>
@@ -30,9 +30,41 @@
   </div>
 </template>
 
+
 <script setup>
   import IconButton from '@/components/UI/IconButton.vue';
   import Footer from '@/components/Footer.vue';
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+
+  const ingredients = ref('');
+  const router = useRouter();
+
+  const analyzeComposition = async () => {
+    try {
+      const response = await fetch('/api/analysis/composition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ingredients: ingredients.value
+        }),
+        credentials: 'include' // Добавлено для CORS
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      localStorage.setItem('analysisResult', JSON.stringify(result));
+      router.push('/analysis-result');
+    } catch (error) {
+      console.error('Error analyzing composition:', error);
+      alert('Ошибка при анализе состава: ' + error.message);
+    }
+  };
 </script>
 
 <style scoped>

@@ -6,21 +6,22 @@
     </header>
     <main>
       <div class="product">
+        <!-- Product Header -->
         <div class="product-header">
           <div class="product-category">
             <p>Шампунь для волос</p>
             <IconButton><img src="../assets/images/icon-like.svg"></IconButton>
           </div>
           <div class="product-name">
-            <h2>
-              HUMAN BEAUTY EVOLUTION DAILY USE
-            </h2>
+            <h2>HUMAN BEAUTY EVOLUTION DAILY USE</h2>
           </div>
         </div>
+
+        <!-- Product Info -->
         <div class="product-info">
           <img src="../assets/images/photo-product-result.svg">
           <div class="product-info-text">
-            <p>Безопасность 89%</p>
+            <p>Безопасность {{ Math.round(analysisResult?.safetyScore) || 89 }}%</p>
             <div>
               <div>
                 <p>Область применения:</p>
@@ -33,22 +34,21 @@
             </div>
           </div>
         </div>
+
+        <!-- Text Block -->
         <div class="text">
-          <p>Безопасность состоит из аллергичности, токсичности
-             и экологичности компонентов. В случае, когда безопасность
-             составляет меньше 60%, то косметическое средство
-             не является безопасным.</p>
+          <p>Безопасность состоит из аллергичности, токсичности и экологичности компонентов. В случае, когда безопасность составляет меньше 60%, то косметическое средство не является безопасным.</p>
         </div>
+
+        <!-- Structure -->
         <div class="structure">
           <h2>Состав</h2>
-          <p>Aqua, Sodium Laureth Sulfate, Sodium Chloride, Coco Glucoside,
-            Cocamidopropyl Betaine, Cocamide DEA, Polyquaternium-7, Sodium Lactate,
-            Glycerin, Ethylenediaminetetraacetic acid, Hydroxypropyltrimonium hydrolyzed
-            vegetable protein, Guar hydroxypropyltrimonium chloride, Olea Europaea
-            (Olive) extract, Fragrance, Methylchloroisothiazolinone.</p>
+          <p>{{ ingredients }}</p>
         </div>
+
+        <!-- Components -->
         <div class="components">
-          <h2>Проискождение компонентов</h2>
+          <h2>Происхождение компонентов</h2>
           <div>
             <img src="../assets/images/diagramm-components.svg">
             <div class="legent">
@@ -63,42 +63,33 @@
             </div>
           </div>
         </div>
+
+        <!-- Components Info -->
         <div class="components-info">
           <h2>О компонентах (INCI)</h2>
-          <div class="components-info-main">
-            <span class="components-info-safety">
-              Безопсано
-            </span>
-            <p>Arginine — действующее вещество</p>
-            <p>Разглаживает волос, хорошо влияет на корни волос</p>
-            <div class="components-info-facts">
-              <p>Аминокислота</p>
-              <p>Заживляет</p>
-              <p>Очищает кожу</p>
-              <p>Укрепляет сосуды</p>
-            </div>
-          </div>
-          <div class="components-info-view">
-            <p>Показать все компоненты</p>
-            <IconButton><img src="../assets/images/arrow-back.svg"></IconButton>
-          </div>
-          <div class="recommendation">
-            <h2>Рекомендации по использованию</h2>
-            <div class="recommendation-items">
-              <p class="recommendation-items-ps">Подходит тем, кто нуждается в следующем:</p>
-              <div>
-                <p>Очищение</p>
-                <p>Увлажнение кожи</p>
-                <p>Антисептическое действие</p>
-                <p>Смягчение кожи</p>
-                <p>Успокоение кожи</p>
-                <p>Улучшение структуры волос</p>
-                <p>Лечение повреждений</p>
-                <p>Кондиционирование волос</p>
-              </div>
+          <div v-for="ingredient in analysisResult?.ingredientsAnalysis || []" :key="ingredient.name">
+            <div class="components-info-main">
+              <span :class="['components-info-safety', `safety-${ingredient.safetyStatus}`]">
+                {{ getSafetyLabel(ingredient.safetyStatus) }}
+              </span>
+              <p>{{ ingredient.name }}</p>
+              <p>{{ ingredient.benefits?.join(', ') }}</p>
             </div>
           </div>
         </div>
+
+        <!-- Recommendation -->
+        <div class="recommendation">
+          <h2>Рекомендации по использованию</h2>
+          <div class="recommendation-items">
+            <p class="recommendation-items-ps">Подходит тем, кто нуждается в следующем:</p>
+            <div>
+              <p v-for="rec in analysisResult?.recommendations || []" :key="rec">{{ rec }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews -->
         <div class="reviews">
           <div class="reviews-header">
             <h2>Отзывы</h2>
@@ -112,6 +103,8 @@
             <span>14 оценок</span>
           </div>
         </div>
+
+        <!-- Similar Products -->
         <div class="similar">
           <h1>Аналогичные продукты</h1>
           <ul class="cards">
@@ -126,6 +119,8 @@
             </li>
           </ul>
         </div>
+
+        <!-- Buttons -->
         <div class="buttons">
           <a href="/experts" class="buttons-item buttons__consult">Консультация у эксперта</a>
           <a href="main-page" class="buttons-item buttons__main">На главную</a>
@@ -135,7 +130,6 @@
     <Footer></Footer>
   </div>
 </template>
-
 <script setup>
   import Footer from '@/components/Footer.vue';
   import IconButton from '@/components/UI/IconButton.vue';
@@ -143,14 +137,24 @@
   import photoProduct from '../assets/images/photo-product.svg'
   import { ref } from 'vue'
   const products = ref([
-  {
-    image: photoProduct,
-    alt: 'Крем для рук и тела LABORATORIUM Вишневый пирог',
-    title: 'Крем для рук и тела',
-    brand: 'LABORATORIUM',
-    description: 'Вишневый пирог',
-  },
-])
+    {
+      image: photoProduct,
+      alt: 'Крем для рук и тела LABORATORIUM Вишневый пирог',
+      title: 'Крем для рук и тела',
+      brand: 'LABORATORIUM',
+      description: 'Вишневый пирог',
+    },
+  ])
+  import { onMounted } from 'vue';
+
+  const analysisResult = ref(null);
+
+  onMounted(() => {
+    const savedResult = localStorage.getItem('analysisResult');
+    if (savedResult) {
+      analysisResult.value = JSON.parse(savedResult);
+    }
+  });
 </script>
 
 <style scoped>
