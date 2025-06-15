@@ -4,7 +4,8 @@ import com.cosmeticguardian.app.model.CompositionAnalysisRequest;
 import com.cosmeticguardian.app.model.CompositionAnalysisResponse;
 import com.cosmeticguardian.app.service.CosmeticAnalysisService;
 import com.cosmeticguardian.app.service.OcrService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,27 +15,26 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/analysis")
 public class CosmeticAnalysisController {
+    private static final Logger logger = LoggerFactory.getLogger(CosmeticAnalysisController.class);
 
     private final CosmeticAnalysisService analysisService;
-    private OcrService ocrService;
+    private final OcrService ocrService;
 
     @Autowired
-    public CosmeticAnalysisController(CosmeticAnalysisService analysisService) {
+    public CosmeticAnalysisController(CosmeticAnalysisService analysisService, OcrService ocrService) {
         this.analysisService = analysisService;
+        this.ocrService = ocrService;
     }
 
     @PostMapping("/composition")
     public ResponseEntity<CompositionAnalysisResponse> analyzeComposition(
             @RequestBody CompositionAnalysisRequest request) {
         try {
-            System.out.println("Received ingredients: " + request.getIngredients());
+            logger.info("Анализ состава: {}", request.getIngredients());
             CompositionAnalysisResponse response = analysisService.analyzeComposition(request.getIngredients());
             return ResponseEntity.ok(response);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка при анализе состава", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -43,14 +43,19 @@ public class CosmeticAnalysisController {
     public ResponseEntity<CompositionAnalysisResponse> analyzePhoto(
             @RequestParam("image") MultipartFile imageFile) {
         try {
-            // 1. Извлечь текст с фото (OCR)
+            if (imageFile.isEmpty()) {
+                logger.warn("Получен пустой файл изображения");
+                return ResponseEntity.badRequest().build();
+            }
+
+            logger.info("Обработка изображения размером {} байт", imageFile.getSize());
             String extractedText = ocrService.extractTextFromImage(imageFile);
+            logger.info("Извлеченный текст: {}", extractedText);
 
-            // 2. Проанализировать текст с помощью DeepSeek
             CompositionAnalysisResponse response = analysisService.analyzeComposition(extractedText);
-
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Ошибка при анализе фото", e);
             return ResponseEntity.internalServerError().build();
         }
     }
