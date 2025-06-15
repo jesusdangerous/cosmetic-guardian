@@ -66,7 +66,7 @@ public class DeepSeekService {
         );
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody().getChoices().get(0).getMessage().getContent();
+            return response.getBody().getChoices().getFirst().getMessage().getContent();
         } else {
             throw new RuntimeException("Failed to get response from DeepSeek API");
         }

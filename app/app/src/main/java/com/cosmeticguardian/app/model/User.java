@@ -28,4 +28,10 @@ public class User {
 
     @ElementCollection
     private List<String> skinProblems;
+
+    @OneToMany(mappedBy = "user")
+    private List<Chat> chats;
+
+    @OneToMany(mappedBy = "sender")
+    private List<Message> messages;
 }
